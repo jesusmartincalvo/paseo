@@ -1,3 +1,4 @@
+import { PluginWorkspaceTrailing } from "@/plugins/workspace-trailing";
 import { memo, useMemo, useCallback, useState, type ReactNode } from "react";
 import { Text, View, type ViewStyle } from "react-native";
 import { StyleSheet, withUnistyles } from "react-native-unistyles";
@@ -64,7 +65,10 @@ export function SidebarWorkspaceRowFrame({
     if (open) setIsHovered(false);
   }, []);
   const hoverHandlers = useMemo(
-    () => ({ onPointerEnter: handlePointerEnter, onPointerLeave: handlePointerLeave }),
+    () => ({
+      onPointerEnter: handlePointerEnter,
+      onPointerLeave: handlePointerLeave,
+    }),
     [handlePointerEnter, handlePointerLeave],
   );
 
@@ -120,7 +124,10 @@ export const SidebarWorkspaceRowContent = memo(function SidebarWorkspaceRowConte
   const {
     settings: { workspaceTitleSource },
   } = useAppSettings();
-  const workspaceLabel = resolveSidebarWorkspacePrimaryLabel({ workspace, workspaceTitleSource });
+  const workspaceLabel = resolveSidebarWorkspacePrimaryLabel({
+    workspace,
+    workspaceTitleSource,
+  });
   // The workspace carries label names; their colors live in its host's catalog, so the row is
   // where the two meet — the meta line is handed finished definitions.
   const labels = useWorkspaceLabelDefinitions(workspace.serverId, workspace.labels);
@@ -159,7 +166,13 @@ export const SidebarWorkspaceRowContent = memo(function SidebarWorkspaceRowConte
             <Text style={workspaceBranchTextStyle} numberOfLines={1}>
               {workspaceLabel}
             </Text>
-            <View style={sidebarWorkspaceRowStyles.rowRight}>{children}</View>
+            <View style={sidebarWorkspaceRowStyles.rowRight}>
+              <PluginWorkspaceTrailing
+                serverId={workspace.serverId}
+                workspaceId={workspace.workspaceId}
+              />
+              {children}
+            </View>
           </View>
           <WorkspaceMetaRow
             currentBranch={workspace.currentBranch}

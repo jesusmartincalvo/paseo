@@ -74,7 +74,9 @@ function ButtonIcon({ loading, leftIcon, iconSize, iconColor }: ButtonIconProps)
 
 const ThemedButtonIcon = withUnistyles(ButtonIcon);
 
-const foregroundIconMapping = (theme: Theme) => ({ iconColor: theme.colors.foreground });
+const foregroundIconMapping = (theme: Theme) => ({
+  iconColor: theme.colors.foreground,
+});
 const foregroundMutedIconMapping = (theme: Theme) => ({
   iconColor: theme.colors.foregroundMuted,
 });
@@ -241,7 +243,11 @@ export function Button({
   );
 
   const accessibilityState = useMemo(
-    () => ({ ...accessibilityStateProp, disabled: isDisabled, busy: loading }),
+    () => ({
+      ...accessibilityStateProp,
+      disabled: isDisabled,
+      busy: loading || Boolean(accessibilityStateProp?.busy),
+    }),
     [accessibilityStateProp, isDisabled, loading],
   );
 

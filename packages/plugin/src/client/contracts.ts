@@ -80,6 +80,27 @@ export interface PluginSidebarItemProps extends PluginHostProps {
   openPopover(Content: ComponentType<PluginPopoverProps>): void;
 }
 
+export interface PluginSidebarWorkspaceAgent {
+  readonly id: string;
+  readonly provider: string;
+  readonly title: string | null;
+  readonly createdAt: string;
+  readonly status: "initializing" | "idle" | "running" | "error" | "closed";
+  readonly statusBucket: "needs_input" | "failed" | "running" | "attention" | "done";
+}
+
+export interface PluginSidebarWorkspaceTrailingProps extends PluginSurfaceProps {
+  workspaceId: string;
+  agents: readonly PluginSidebarWorkspaceAgent[];
+  connected: boolean;
+}
+
+export interface PluginSidebarWorkspaceTrailingContribution {
+  id: string;
+  title: string;
+  Component: ComponentType<PluginSidebarWorkspaceTrailingProps>;
+}
+
 export interface PluginSidebarItemContribution {
   id: string;
   /** Settings row label, accessibility label, and default label for SidebarRow. */
@@ -137,6 +158,9 @@ export interface PluginClientContext extends PluginCommandCapabilities, PluginCl
   addScreen(contribution: PluginScreenContribution): PluginCleanup;
   addSidebarHeaderItem(contribution: PluginSidebarItemContribution): PluginCleanup;
   addSidebarFooterItem(contribution: PluginSidebarItemContribution): PluginCleanup;
+  addSidebarWorkspaceTrailing(
+    contribution: PluginSidebarWorkspaceTrailingContribution,
+  ): PluginCleanup;
   addWorkspacePanel(contribution: PluginWorkspacePanelContribution): PluginCleanup;
   addCommandCenterItem(contribution: PluginCommandCenterItemContribution): PluginCleanup;
   addSlashCommand(contribution: PluginClientSlashCommandContribution): PluginCleanup;

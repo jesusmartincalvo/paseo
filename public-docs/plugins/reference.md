@@ -1577,6 +1577,60 @@ Settings RPCs use the existing `daemon.manage` permission for plugin execution.
 See the complete [settings example](https://github.com/getpaseo/paseo/tree/main/plugin-examples/settings)
 for immediate controls, a draft editor with validation, custom content, and Command Center navigation.
 
+## Workspace sidebar trailing content
+
+The session-status fork adds `client.addSidebarWorkspaceTrailing({ id, title, Component })`.
+It renders beside each workspace title, before the existing diff/timestamp and menu, in both
+sidebar grouping modes. It returns the same idempotent cleanup function as other contributions.
+Stock clients without this API must report that the app needs updating.
+
+The component receives `PluginSidebarWorkspaceTrailingProps`: the usual theme, host, layout
+and navigation, plus `workspaceId`, `connected`, and `agents`. The host supplies unarchived
+workspace-tab session summaries in creation-time/ID order, scoped to that row's host. Each has
+`id`, `provider`, `title`, `createdAt`, normalized `status`, and canonical `statusBucket`.
+The bucket accounts for pending permissions and turn liveness. Internal subagents are excluded.
+Use `connected` to avoid presenting a disconnected snapshot as live activity.
+
+`AgentStatusButton` from `@getpaseo/plugin/client/react-native` reuses the host's provider artwork,
+status ring/dot, tooltip and accessibility behavior. Pass `agent`, `serverId`, `connected`, and
+`onPress`; navigation remains the contribution's choice. Disconnected buttons are disabled.
+
+```tsx
+import type {
+  PluginClientContext,
+  PluginSidebarWorkspaceTrailingProps,
+} from "@getpaseo/plugin/client";
+import { AgentStatusButton } from "@getpaseo/plugin/client/react-native";
+import { View } from "react-native";
+
+function Sessions({ agents, host, connected, navigation }: PluginSidebarWorkspaceTrailingProps) {
+  return (
+    <View style={{ flexDirection: "row" }}>
+      {agents.map((agent) => (
+        <AgentStatusButton
+          key={agent.id}
+          agent={agent}
+          serverId={host.id}
+          connected={connected}
+          onPress={() => navigation?.openAgent({ agentId: agent.id, serverId: host.id })}
+        />
+      ))}
+    </View>
+  );
+}
+export default function contribute(client: PluginClientContext) {
+  return client.addSidebarWorkspaceTrailing({
+    id: "sessions",
+    title: "Sessions",
+    Component: Sessions,
+  });
+}
+```
+
+Each contribution is isolated by an error boundary. Disable/reload unmounts its components and
+releases its registrations; subscriptions created by components still need normal React cleanup.
+The API is additive: existing entries and scaffold imports need no migration.
+
 ## Workspace panels
 
 Register one panel for workspace or agent context:

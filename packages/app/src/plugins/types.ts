@@ -12,6 +12,7 @@ import type {
   PluginComposerPillContribution,
   PluginSidebarContribution,
   PluginSidebarItemContribution,
+  PluginSidebarWorkspaceTrailingContribution,
   PluginScreenContribution,
   PluginSettingsScreenContribution,
   PluginTimelineRendererContribution,
@@ -35,6 +36,7 @@ export interface EvaluatedPlugin {
   // COMPAT(pluginSidebarAliases): added in v0.11.0, remove after 2027-03-29
   /** `addSidebarItem` registrations, so `/plugin/<id>/sidebar/<item>` routes keep resolving. */
   legacySidebarItems: PluginSidebarContribution[];
+  workspaceTrailing: PluginSidebarWorkspaceTrailingContribution[];
   workspacePanels: EvaluatedPluginWorkspacePanelContribution[];
   commandCenterItems: PluginCommandCenterItemContribution[];
   clientSlashCommands: PluginClientSlashCommandContribution[];

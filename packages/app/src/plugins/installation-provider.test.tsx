@@ -32,6 +32,7 @@ function installation(invoked: string[]): InstalledPlugin {
     surfaces: [],
     sidebarItems: { header: [], footer: [] },
     legacySidebarItems: [],
+    workspaceTrailing: [],
     workspacePanels: [],
     commandCenterItems: [],
     clientSlashCommands: [],

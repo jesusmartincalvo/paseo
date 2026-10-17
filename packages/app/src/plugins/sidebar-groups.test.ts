@@ -30,6 +30,7 @@ function installed(
       footer: [{ id: "status", title: "Status", Component: () => null }],
     },
     legacySidebarItems,
+    workspaceTrailing: [],
     workspacePanels: [],
     commandCenterItems: [],
     clientSlashCommands: [],
@@ -68,7 +69,11 @@ describe("groupPluginSidebarItems", () => {
     const plugins = [installed("host-a", "main", legacy), installed("host-b", "main", legacy)];
     const [legacyGroup, itemGroup] = groupPluginSidebarItems(plugins, "header");
 
-    expect(legacyGroup).toMatchObject({ kind: "legacy", title: "Legacy", icon: "Blocks" });
+    expect(legacyGroup).toMatchObject({
+      kind: "legacy",
+      title: "Legacy",
+      icon: "Blocks",
+    });
     expect(legacyGroup?.targets.map((target) => target.plugin.serverId)).toEqual([
       "host-a",
       "host-b",

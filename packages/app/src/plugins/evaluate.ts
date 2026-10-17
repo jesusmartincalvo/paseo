@@ -113,6 +113,7 @@ export function runPluginClientBundle(
     settingsScreens: [],
     sidebarItems: { header: [], footer: [] },
     legacySidebarItems: [],
+    workspaceTrailing: [],
     workspacePanels: [],
     commandCenterItems: [],
     clientSlashCommands: [],
@@ -128,6 +129,7 @@ export function runPluginClientBundle(
     footer: new Set(),
   };
   const workspacePanelIds = new Set<string>();
+  const workspaceTrailingIds = new Set<string>();
   const commandCenterItemIds = new Set<string>();
   const clientSlashCommandNames = new Set<string>();
   const attachmentSourceIds = new Set<string>();
@@ -220,6 +222,19 @@ export function runPluginClientBundle(
         collector.surfaces,
         { id: normalizedId, title, Component: contribution.Component },
         () => surfaceIds.delete(normalizedId),
+      );
+    },
+    addSidebarWorkspaceTrailing(contribution) {
+      const trailingId = requireId(contribution.id, "workspace trailing id");
+      if (workspaceTrailingIds.has(trailingId))
+        throw new Error(`Duplicate workspace trailing: ${trailingId}`);
+      const title = contribution.title.trim();
+      if (!title || !isComponentType(contribution.Component)) {
+        throw new Error(`Invalid workspace trailing: ${trailingId}`);
+      }
+      workspaceTrailingIds.add(trailingId);
+      return register(collector.workspaceTrailing, { ...contribution, id: trailingId, title }, () =>
+        workspaceTrailingIds.delete(trailingId),
       );
     },
     addSidebarHeaderItem(contribution: PluginSidebarItemContribution) {
@@ -379,7 +394,10 @@ export function runPluginClientBundle(
     addTheme(contribution: PluginThemeContribution) {
       const normalizedId = requireId(contribution.id, "theme id");
       if (themeIds.has(normalizedId)) throw new Error(`Duplicate theme: ${normalizedId}`);
-      const theme = parsePluginThemeContribution({ ...contribution, id: normalizedId });
+      const theme = parsePluginThemeContribution({
+        ...contribution,
+        id: normalizedId,
+      });
       themeIds.add(normalizedId);
       return register(collector.themes, theme, () => themeIds.delete(normalizedId));
     },
@@ -515,6 +533,7 @@ export function runPluginClientBundle(
     settingsScreens: collector.settingsScreens,
     sidebarItems: collector.sidebarItems,
     legacySidebarItems: collector.legacySidebarItems,
+    workspaceTrailing: collector.workspaceTrailing,
     workspacePanels: collector.workspacePanels as EvaluatedPlugin["workspacePanels"],
     commandCenterItems: collector.commandCenterItems,
     clientSlashCommands: collector.clientSlashCommands,

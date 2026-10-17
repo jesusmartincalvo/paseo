@@ -53,6 +53,14 @@ export interface ToastApi {
   error(message: string): void;
 }
 
+export interface AgentStatusButtonProps {
+  agent: import("./contracts.js").PluginSidebarWorkspaceAgent;
+  serverId: string;
+  connected: boolean;
+  onPress(): void;
+}
+
+export declare const AgentStatusButton: ComponentType<AgentStatusButtonProps>;
 export declare const Icon: ComponentType<PluginIconProps>;
 export declare const Modal: ModalComponent;
 export declare function useToast(): ToastApi;

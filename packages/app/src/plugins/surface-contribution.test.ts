@@ -32,6 +32,7 @@ function installation(
       title: item.id,
       icon: "Blocks",
     })),
+    workspaceTrailing: [],
     workspacePanels: [],
     commandCenterItems: [],
     clientSlashCommands: [],
@@ -109,8 +110,10 @@ describe("plugin surface contribution identity", () => {
     expect(resolved.sidebarItem).toBeNull();
     expect(resolved.surface?.id).toBe("overview");
     expect(
-      resolvePluginSurfaceContribution(installations[2] ?? null, { kind: "sidebar", id: "missing" })
-        .surface,
+      resolvePluginSurfaceContribution(installations[2] ?? null, {
+        kind: "sidebar",
+        id: "missing",
+      }).surface,
     ).toBeNull();
   });
 });
@@ -154,11 +157,17 @@ describe("parsePluginOpenScreenInput", () => {
       screenId: "bot",
       params: {},
     });
-    expect(parsePluginOpenScreenInput(plugin, { screenId: "bot", params: { botId: "2" } })).toEqual(
-      { screenId: "bot", params: { botId: "2" } },
-    );
     expect(
-      parsePluginOpenScreenInput(plugin, { screenId: "bot", params: { serverId: "x" } }),
+      parsePluginOpenScreenInput(plugin, {
+        screenId: "bot",
+        params: { botId: "2" },
+      }),
+    ).toEqual({ screenId: "bot", params: { botId: "2" } });
+    expect(
+      parsePluginOpenScreenInput(plugin, {
+        screenId: "bot",
+        params: { serverId: "x" },
+      }),
     ).toEqual({ screenId: "bot", params: { serverId: "x" } });
   });
 
@@ -168,7 +177,10 @@ describe("parsePluginOpenScreenInput", () => {
       "unavailable: missing",
     );
     expect(() =>
-      parsePluginOpenScreenInput(plugin, { screenId: "bot", params: { botId: 2 } }),
+      parsePluginOpenScreenInput(plugin, {
+        screenId: "bot",
+        params: { botId: 2 },
+      }),
     ).toThrow("botId must be a string");
     expect(() => parsePluginOpenScreenInput(plugin, { screenId: "bot", params: ["2"] })).toThrow(
       "must be an object of strings",
@@ -178,7 +190,10 @@ describe("parsePluginOpenScreenInput", () => {
 
 describe("resolvePluginScreenTitle", () => {
   const Component = () => null;
-  const botNames: Record<string, string> = { "bot-1": "Bot 1", "bot-2": "Bot 2" };
+  const botNames: Record<string, string> = {
+    "bot-1": "Bot 1",
+    "bot-2": "Bot 2",
+  };
   const bot = {
     id: "bot",
     title: (params: Record<string, string>) => botNames[params.botId] ?? "",
@@ -209,7 +224,12 @@ describe("resolvePluginScreenTitle", () => {
   });
 
   it("uses the title of a legacy item that points at the screen", () => {
-    const legacy = { id: "entry", title: "Legacy entry", icon: "Server", surface: "main" };
+    const legacy = {
+      id: "entry",
+      title: "Legacy entry",
+      icon: "Server",
+      surface: "main",
+    };
     expect(resolvePluginScreenTitle({ id: "main", title: "main", Component }, legacy, {})).toBe(
       "Legacy entry",
     );

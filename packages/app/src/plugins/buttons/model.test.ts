@@ -18,6 +18,7 @@ function installation(): InstalledPlugin {
     surfaces: [],
     sidebarItems: { header: [], footer: [] },
     legacySidebarItems: [],
+    workspaceTrailing: [],
     workspacePanels: [],
     commandCenterItems: [],
     clientSlashCommands: [],
@@ -37,7 +38,11 @@ function store() {
 }
 
 function button(onPress = () => {}): PluginButton {
-  return { title: "Review", icon: "Scan", behavior: { kind: "action", onPress } };
+  return {
+    title: "Review",
+    icon: "Scan",
+    behavior: { kind: "action", onPress },
+  };
 }
 
 describe("plugin buttons", () => {
@@ -80,14 +85,21 @@ describe("plugin buttons", () => {
   it("rejects duplicates within a target and validates updates atomically", () => {
     const buttons = store();
     const plugin = installation();
-    const contribution = { id: "review", workspaceId: "workspace", button: button() };
+    const contribution = {
+      id: "review",
+      workspaceId: "workspace",
+      button: button(),
+    };
     const header = buttons.addHeaderButton(plugin, contribution);
     expect(() => buttons.addHeaderButton(plugin, contribution)).toThrow(
       "Duplicate plugin button: review",
     );
     expect(() => buttons.addHeaderButton(installation(), contribution)).not.toThrow();
     expect(() =>
-      buttons.addHeaderButton(plugin, { ...contribution, workspaceId: "other" }),
+      buttons.addHeaderButton(plugin, {
+        ...contribution,
+        workspaceId: "other",
+      }),
     ).not.toThrow();
     expect(() => header.update({ title: "Changed", icon: "Invalid" })).toThrow("Unknown icon");
     expect(buttons.getSnapshot()[0].button.title).toBe("Review");
