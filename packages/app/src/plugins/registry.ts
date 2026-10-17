@@ -70,7 +70,11 @@ export class PluginRegistry {
       let installation: InstalledPlugin | undefined;
       try {
         if (!entry.clientBundle) return [];
-        assertPluginCompatibility({ ...entry, version: this.dependencies.version, runtime: "app" });
+        assertPluginCompatibility({
+          ...entry,
+          version: this.dependencies.version,
+          runtime: "app",
+        });
         const existing = preserved.find(
           (plugin) => plugin.id === entry.id && plugin.clientBundle === entry.clientBundle,
         );
@@ -93,6 +97,7 @@ export class PluginRegistry {
           settingsScreens: [],
           sidebarItems: { header: [], footer: [] },
           legacySidebarItems: [],
+          workspaceTrailing: [],
           workspacePanels: [],
           commandCenterItems: [],
           clientSlashCommands: [],

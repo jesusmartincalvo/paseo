@@ -70,7 +70,10 @@ function catalog(id: string, body = "return function() {};") {
 
 test("setup and every surface share the installation's one Paseo client", () => {
   const h = registry();
-  h.plugins.installCatalog("host", [catalog("deploys")], { client: h.client, audio });
+  h.plugins.installCatalog("host", [catalog("deploys")], {
+    client: h.client,
+    audio,
+  });
 
   const [installation] = h.plugins.getSnapshot();
   expect(h.setupClients.get("deploys")).toBe(installation.paseo);
@@ -86,7 +89,10 @@ test("teardown ends every subscription the plugin still holds", async () => {
   expect(h.open).toEqual(new Set(["disabled", "kept"]));
 
   // Disabling one plugin removes it from the catalog.
-  h.plugins.installCatalog("host", [catalog("kept")], { client: h.client, audio });
+  h.plugins.installCatalog("host", [catalog("kept")], {
+    client: h.client,
+    audio,
+  });
   await expect.poll(() => [...h.open]).toEqual(["kept"]);
 
   h.plugins.removeHost("host");
@@ -95,7 +101,10 @@ test("teardown ends every subscription the plugin still holds", async () => {
 
 test("reloading a plugin ends the old installation's subscriptions", async () => {
   const h = registry();
-  h.plugins.installCatalog("host", [catalog("reloaded")], { client: h.client, audio });
+  h.plugins.installCatalog("host", [catalog("reloaded")], {
+    client: h.client,
+    audio,
+  });
   const [first] = h.plugins.getSnapshot();
 
   h.plugins.installCatalog("host", [catalog("reloaded")], {
@@ -126,7 +135,10 @@ test("unloading ends the subscriptions even when plugin cleanup throws, preservi
   const h = registry();
   const failing = catalog("failing", 'return function() { throw new Error("cleanup failed"); };');
   const surviving = catalog("surviving", "return function() {};");
-  h.plugins.installCatalog("host", [failing, surviving], { client: h.client, audio });
+  h.plugins.installCatalog("host", [failing, surviving], {
+    client: h.client,
+    audio,
+  });
   h.plugins.installCatalog("host", [surviving], { client: h.client, audio });
   await expect.poll(() => [...h.open]).toEqual(["surviving"]);
   expect(h.plugins.getSnapshot().map((plugin) => plugin.id)).toEqual(["surviving"]);
@@ -143,5 +155,29 @@ test("an invalid async client entry is disposed and its rejected continuation is
   );
   await expect.poll(() => h.open.size).toBe(0);
   await new Promise((resolve) => setTimeout(resolve, 0));
+  expect(h.plugins.getSnapshot()).toEqual([]);
+});
+
+test("workspace trailing slots are removed with their installation and replaced on reload", async () => {
+  const h = registry();
+  const slots = catalog(
+    "sessions",
+    `
+    plugin.addSidebarWorkspaceTrailing({ id: "states", title: "States", Component() { return null; } });
+    return function() {};
+  `,
+  );
+  h.plugins.installCatalog("host", [slots], { client: h.client, audio });
+  const [first] = h.plugins.getSnapshot();
+  expect(first.workspaceTrailing.map((slot) => slot.id)).toEqual(["states"]);
+  h.plugins.installCatalog("host", [slots], {
+    client: h.client,
+    audio,
+    replacePluginId: "sessions",
+  });
+  expect(h.plugins.getSnapshot()[0]).not.toBe(first);
+  await expect.poll(() => first.workspaceTrailing).toEqual([]);
+  expect(h.plugins.getSnapshot()[0].workspaceTrailing).toHaveLength(1);
+  h.plugins.removeHost("host");
   expect(h.plugins.getSnapshot()).toEqual([]);
 });

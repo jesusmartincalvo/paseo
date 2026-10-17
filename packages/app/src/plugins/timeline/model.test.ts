@@ -20,6 +20,7 @@ function plugin(input: {
     surfaces: [],
     sidebarItems: { header: [], footer: [] },
     legacySidebarItems: [],
+    workspaceTrailing: [],
     workspacePanels: [],
     commandCenterItems: [],
     clientSlashCommands: [],
@@ -176,7 +177,14 @@ describe("plugin timeline transforms", () => {
         plugin({
           id: "reports",
           transform: () => ({
-            items: [{ type: "plugin" as const, kind: "test-report", version: 1, data }],
+            items: [
+              {
+                type: "plugin" as const,
+                kind: "test-report",
+                version: 1,
+                data,
+              },
+            ],
           }),
         }),
       ],

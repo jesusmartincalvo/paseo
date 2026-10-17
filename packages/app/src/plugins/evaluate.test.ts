@@ -378,7 +378,14 @@ describe("evaluatePluginClientBundle", () => {
         icon,
         context,
       })),
-    ).toEqual([{ id: "open-review", title: "Open review", icon: "Scan", context: "agent" }]);
+    ).toEqual([
+      {
+        id: "open-review",
+        title: "Open review",
+        icon: "Scan",
+        context: "agent",
+      },
+    ]);
   });
 
   it("normalizes and validates workspace panel locations", () => {
@@ -745,4 +752,44 @@ it("binds imported getters to each originating installation across delayed callb
   ]);
   await first.cleanup();
   await second.cleanup();
+});
+
+describe("workspace trailing contributions", () => {
+  it("registers distinct slots and removes them on cleanup", async () => {
+    const plugin = evaluatePluginClientBundle(
+      "sessions",
+      bundle(`
+      plugin.addSidebarWorkspaceTrailing({ id: "sessions", title: "Sessions", Component() { return null; } });
+    `),
+    );
+    expect(plugin.workspaceTrailing.map((entry) => entry.id)).toEqual(["sessions"]);
+    await plugin.cleanup();
+    expect(plugin.workspaceTrailing).toEqual([]);
+  });
+
+  it.each([
+    ['{ id: "sessions", title: "", Component() {} }', "Invalid workspace trailing"],
+    ['{ id: "Bad id", title: "Sessions", Component() {} }', "Invalid workspace trailing id"],
+    ['{ id: "sessions", title: "Sessions", Component: "div" }', "Invalid workspace trailing"],
+  ])("rejects invalid workspace contributions", (input, error) => {
+    expect(() =>
+      evaluatePluginClientBundle(
+        "sessions",
+        bundle(`plugin.addSidebarWorkspaceTrailing(${input});`),
+      ),
+    ).toThrow(error);
+  });
+
+  it("rejects duplicate slot IDs", () => {
+    expect(() =>
+      evaluatePluginClientBundle(
+        "sessions",
+        bundle(`
+      const slot = { id: "sessions", title: "Sessions", Component() {} };
+      plugin.addSidebarWorkspaceTrailing(slot);
+      plugin.addSidebarWorkspaceTrailing(slot);
+    `),
+      ),
+    ).toThrow("Duplicate workspace trailing");
+  });
 });
